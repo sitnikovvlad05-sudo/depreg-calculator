@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEPREG | Калькулятор стоимости бейджей и лент</title>
+    <style>
+        :root {
+            --primary-blue: #0055a5;
+            --dark-blue: #003366;
+            --light-gray: #f8f9fa;
+            --border-gray: #dee2e6;
+            --text-dark: #333;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: var(--light-gray);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .logo {
+            margin-bottom: 15px;
+        }
+        
+        .logo img {
+            max-width: 250px;
+            height: auto;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .tabs {
+            display: flex;
+            background-color: var(--dark-blue);
+            border-bottom: 1px solid var(--border-gray);
+        }
+        
+        .tab-button {
+            flex: 1;
+            background: none;
+            border: none;
+            color: white;
+            padding: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .tab-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab-button.active {
+            background-color: var(--primary-blue);
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            background-color: var(--light-gray);
+        }
+        
+        .form-group h3 {
+            margin-bottom: 15px;
+            color: var(--dark-blue);
+            border-bottom: 1px solid var(--border-gray);
+            padding-bottom: 8px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        select, input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-gray);
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .option-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .option-item input {
+            margin-right: 10px;
+            width: auto;
+        }
+        
+        .client-type {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .client-type label {
+            display: flex;
+            align-items: center;
+            font-weight: normal;
+            margin-bottom: 0;
+        }
+        
+        .client-type input {
+            margin-right: 8px;
+            width: auto;
+        }
+        
+        .custom-percent {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .custom-percent input {
+            width: 80px;
+            margin-bottom: 0;
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+        }
+        
+        .radio-option input {
+            margin-right: 10px;
+        }
+        
+        .result {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .result h3 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .price {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .note {
+            font-size: 14px;
+            margin-top: 15px;
+            opacity: 0.9;
+        }
+        
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .client-type {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="https://i.ibb.co/G4Ksr4qh/logo-PNG-1-1.png" alt="DEPREG">
+            </div>
+            <h1>Калькулятор стоимости бейджей и лент</h1>
+            <p>Рассчитайте стоимость заказа онлайн</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-button active" data-tab="badges">Бейджи</button>
+            <button class="tab-button" data-tab="sublimation">Ленты-Сублимация</button>
+            <button class="tab-button" data-tab="silkprint">Ленты-Шелкография</button>
+        </div>
+        
+        <!-- Вкладка Бейджи -->
+        <div id="badges" class="tab-content active">
+            <div class="form-group">
+                <h3>Основные параметры</h3>
+                <label for="badge-type">Тип бейджа:</label>
+                <select id="badge-type">
+                    <option value="37">Маленький (86x54мм, 90x60мм)</option>
+                    <option value="51">Средний (54x54мм, 92x92мм, 97x54мм, 100x70мм, 110x80мм, 120x54мм)</option>
+                    <option value="53">Классический (120x82мм, 120x88мм, 130x90мм, 130x110мм, 140x54мм, 140x88мм, 140x90мм, 140x95мм, 150x100мм, 150x110мм)</option>
+                </select>
+                
+                <label for="badge-quantity">Тираж (шт):</label>
+                <input type="number" id="badge-quantity" min="1" value="50">
+            </div>
+            
+            <div class="form-group">
+                <h3>Дополнительные опции</h3>
+                <div class="options-grid">
+                    <div class="option-item">
+                        <input type="checkbox" id="badge-double-side" data-base-price="10">
+                        <label for="badge-double-side">Печать с двух сторон</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="badge-personal" data-base-price="7">
+                        <label for="badge-personal">Нанесение персональных данных</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="badge-second-hole" data-base-price="4">
+                        <label for="badge-second-hole">Пробивка второго отверстия</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <h3>Тип клиента</h3>
+                <div class="client-type">
+                    <label>
+                        <input type="radio" name="badge-client-type" value="1.25" checked>
+                        Новый клиент (+25%)
+                    </label>
+                    <label>
+                        <input type="radio" name="badge-client-type" value="1.4">
+                        Действующий клиент (+40%)
+                    </label>
+                    <div class="custom-percent">
+                        <label>
+                            <input type="radio" name="badge-client-type" value="1" id="badge-custom-percent-radio">
+                            Свой процент:
+                        </label>
+                        <input type="number" id="badge-custom-percent" min="0" max="200" value="0" step="1" style="width: 80px;"> %
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result" id="badge-result">
+                <h3>Итоговая стоимость</h3>
+                <div>Стоимость за 1 шт: <span class="price" id="badge-price-unit">0</span> руб.</div>
+                <div>Общая стоимость: <span class="price" id="badge-price-total">0</span> руб.</div>
+            </div>
+        </div>
+        
+        <!-- Вкладка Ленты-Сублимация -->
+        <div id="sublimation" class="tab-content">
+            <div class="form-group">
+                <h3>Основные параметры</h3>
+                <label for="sublimation-type">Тип ленты:</label>
+                <select id="sublimation-type">
+                    <option value="170">15 мм</option>
+                    <option value="180">20 мм</option>
+                    <option value="190">25 мм</option>
+                </select>
+                
+                <label for="sublimation-quantity">Тираж (шт):</label>
+                <input type="number" id="sublimation-quantity" min="1" value="50">
+            </div>
+            
+            <div class="form-group">
+                <h3>Дополнительная фурнитура</h3>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" name="sublimation-hardware" value="0" id="sublimation-none" checked>
+                        <label for="sublimation-none">Без дополнительной фурнитуры</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="sublimation-hardware" value="15" id="sublimation-second-mount">
+                        <label for="sublimation-second-mount">Второе крепление (+15 руб)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="sublimation-hardware" value="42" id="sublimation-plastic-retrans">
+                        <label for="sublimation-plastic-retrans">Ретрактор пластиковый (+42 руб)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="sublimation-hardware" value="16" id="sublimation-carabiner">
+                        <label for="sublimation-carabiner">Карабин-клешня, черный карабин-люкс (+16 руб)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="sublimation-hardware" value="5" id="sublimation-carabiner-replace">
+                        <label for="sublimation-carabiner-replace">Карабин-клешня / Пластиковая петля/черный карабин-люкс (вместо основного) (+5 руб)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="sublimation-hardware" value="8" id="sublimation-metal-ring">
+                        <label for="sublimation-metal-ring">Кольцо металлическое, регулятор шарик (+8 руб)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="sublimation-hardware" value="100" id="sublimation-metal-retrans">
+                        <label for="sublimation-metal-retrans">Ретрактор металлический (+100 руб)</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <h3>Тип клиента</h3>
+                <div class="client-type">
+                    <label>
+                        <input type="radio" name="sublimation-client-type" value="1.25" checked>
+                        Новый клиент (+25%)
+                    </label>
+                    <label>
+                        <input type="radio" name="sublimation-client-type" value="1.4">
+                        Действующий клиент (+40%)
+                    </label>
+                    <div class="custom-percent">
+                        <label>
+                            <input type="radio" name="sublimation-client-type" value="1" id="sublimation-custom-percent-radio">
+                            Свой процент:
+                        </label>
+                        <input type="number" id="sublimation-custom-percent" min="0" max="200" value="0" step="1" style="width: 80px;"> %
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result" id="sublimation-result">
+                <h3>Итоговая стоимость</h3>
+                <div>Стоимость за 1 шт: <span class="price" id="sublimation-price-unit">0</span> руб.</div>
+                <div>Общая стоимость: <span class="price" id="sublimation-price-total">0</span> руб.</div>
+            </div>
+        </div>
+        
+        <!-- Вкладка Ленты-Шелкография -->
+        <div id="silkprint" class="tab-content">
+            <div class="form-group">
+                <h3>Основные параметры</h3>
+                <label for="silkprint-type">Тип ленты:</label>
+                <select id="silkprint-type">
+                    <option value="165">11 мм</option>
+                    <option value="170">16 мм</option>
+                    <option value="175">20 мм</option>
+                    <option value="180">25 мм</option>
+                </select>
+                
+                <label for="silkprint-quantity">Тираж (шт):</label>
+                <input type="number" id="silkprint-quantity" min="1" value="50">
+            </div>
+            
+            <div class="form-group">
+                <h3>Тип печати</h3>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" name="silkprint-print-type" value="standard" id="silkprint-standard" checked>
+                        <label for="silkprint-standard">Стандартная печать (1+0)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="silkprint-print-type" value="two-colors" id="silkprint-two-colors">
+                        <label for="silkprint-two-colors">Печать в 2 цвета (2+0)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="silkprint-print-type" value="double-side" id="silkprint-double-side">
+                        <label for="silkprint-double-side">Печать с двух сторон (1+1)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="silkprint-print-type" value="two-one-side" id="silkprint-two-one-side">
+                        <label for="silkprint-two-one-side">Печать 2 цвета с лица и 1 с оборота (2+1)</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <h3>Дополнительная фурнитура</h3>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" name="silkprint-hardware" value="0" id="silkprint-none" checked>
+                        <label for="silkprint-none">Без дополнительной фурнитуры</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="silkprint-hardware" value="15" id="silkprint-second-mount">
+                        <label for="silkprint-second-mount">Второе крепление (+15 руб)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="silkprint-hardware" value="42" id="silkprint-plastic-retrans">
+                        <label for="silkprint-plastic-retrans">Ретрактор пластиковый (+42 руб)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="silkprint-hardware" value="16" id="silkprint-carabiner">
+                        <label for="silkprint-carabiner">Карабин-клешня, черный карабин-люкс (+16 руб)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="silkprint-hardware" value="5" id="silkprint-carabiner-replace">
+                        <label for="silkprint-carabiner-replace">Карабин-клешня / Пластиковая петля/черный карабин-люкс (вместо основного) (+5 руб)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="silkprint-hardware" value="8" id="silkprint-metal-ring">
+                        <label for="silkprint-metal-ring">Кольцо металлическое, регулятор шарик (+8 руб)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="silkprint-hardware" value="100" id="silkprint-metal-retrans">
+                        <label for="silkprint-metal-retrans">Ретрактор металлический (+100 руб)</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <h3>Тип клиента</h3>
+                <div class="client-type">
+                    <label>
+                        <input type="radio" name="silkprint-client-type" value="1.25" checked>
+                        Новый клиент (+25%)
+                    </label>
+                    <label>
+                        <input type="radio" name="silkprint-client-type" value="1.4">
+                        Действующий клиент (+40%)
+                    </label>
+                    <div class="custom-percent">
+                        <label>
+                            <input type="radio" name="silkprint-client-type" value="1" id="silkprint-custom-percent-radio">
+                            Свой процент:
+                        </label>
+                        <input type="number" id="silkprint-custom-percent" min="0" max="200" value="0" step="1" style="width: 80px;"> %
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result" id="silkprint-result">
+                <h3>Итоговая стоимость</h3>
+                <div>Стоимость за 1 шт: <span class="price" id="silkprint-price-unit">0</span> руб.</div>
+                <div>Общая стоимость: <span class="price" id="silkprint-price-total">0</span> руб.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Данные прайсов с исправленными диапазонами
+        const priceData = {
+            badges: {
+                quantities: [50, 100, 200, 300, 500, 1000, 2000, 3000],
+                basePrices: [37, 31, 24, 21, 19, 15, 14, 13],
+                options: {
+                    'double-side': [10, 10, 10, 10, 8, 7, 6, 5],
+                    'personal': [7, 6, 5, 4, 3, 3, 3, 3]
+                }
+            },
+            sublimation: {
+                quantities: [50, 100, 200, 300, 500, 1000, 2000, 3000, 5000, 10000],
+                sizes: {
+                    '15mm': [170, 110, 90, 85, 80, 77, 75, 69, 64, 58],
+                    '20mm': [180, 115, 95, 90, 86, 83, 80, 75, 69, 66],
+                    '25mm': [190, 125, 105, 100, 91, 90, 88, 83, 78, 73]
+                }
+            },
+            silkprint: {
+                quantities: [50, 100, 200, 300, 500, 1000, 2000, 3000, 5000, 10000],
+                sizes: {
+                    '11mm': [165, 90, 80, 70, 60, 55, 53, 50, 47, 42],
+                    '16mm': [170, 95, 85, 75, 65, 60, 58, 55, 52, 47],
+                    '20mm': [175, 100, 90, 80, 70, 65, 63, 60, 57, 52],
+                    '25mm': [180, 105, 95, 85, 75, 70, 68, 65, 62, 57]
+                }
+            }
+        };
+
+        // Функция для получения цены по тиражу
+        function getPriceForQuantity(quantity, quantities, prices) {
+            if (quantity < quantities[0]) {
+                // Меньше минимального тиража - цена минимального тиража +30%
+                return Math.ceil(prices[0] * 1.3);
+            }
+            
+            // Находим подходящий диапазон тиража
+            for (let i = quantities.length - 1; i >= 0; i--) {
+                if (quantity >= quantities[i]) {
+                    return prices[i];
+                }
+            }
+            
+            return prices[0];
+        }
+
+        // Функция для получения цены опции по тиражу
+        function getOptionPriceForQuantity(option, quantity, quantities, optionPrices) {
+            if (quantity < quantities[0]) {
+                return Math.ceil(optionPrices[0] * 1.3);
+            }
+            
+            for (let i = quantities.length - 1; i >= 0; i--) {
+                if (quantity >= quantities[i] && optionPrices[i] !== null) {
+                    return optionPrices[i];
+                }
+            }
+            
+            return optionPrices[0];
+        }
+
+        // Функция для получения стоимости доплаты за 2 цвета для шелкографии
+        function getTwoColorsPrice(quantity) {
+            if (quantity < 100) return 20;      // до 99 шт: +20 руб
+            if (quantity < 200) return 15;      // 100-199 шт: +15 руб
+            if (quantity < 300) return 10;      // 200-299 шт: +10 руб
+            if (quantity < 5000) return 7;      // 300-4999 шт: +7 руб
+            return 5;                           // 5000-10000 шт: +5 руб
+        }
+
+        // Функция для получения множителя наценки клиента
+        function getClientMultiplier(tabPrefix) {
+            const customPercentRadio = document.getElementById(`${tabPrefix}-custom-percent-radio`);
+            const customPercentInput = document.getElementById(`${tabPrefix}-custom-percent`);
+            
+            if (customPercentRadio.checked) {
+                const customPercent = parseFloat(customPercentInput.value) || 0;
+                return 1 + (customPercent / 100);
+            }
+            
+            const selectedRadio = document.querySelector(`input[name="${tabPrefix}-client-type"]:checked`);
+            return parseFloat(selectedRadio.value);
+        }
+
+        // Функция для получения стоимости выбранной фурнитуры
+        function getHardwarePrice(tabPrefix) {
+            const selectedHardware = document.querySelector(`input[name="${tabPrefix}-hardware"]:checked`);
+            return parseFloat(selectedHardware.value) || 0;
+        }
+
+        // Расчет для бейджей
+        function calculateBadges() {
+            const quantity = parseInt(document.getElementById('badge-quantity').value) || 0;
+            const badgeType = parseFloat(document.getElementById('badge-type').value);
+            const clientMultiplier = getClientMultiplier('badge');
+            
+            // Получаем базовую цену в зависимости от тиража
+            const basePrice = getPriceForQuantity(quantity, priceData.badges.quantities, priceData.badges.basePrices);
+            
+            // Расчет стоимости опций
+            let optionsPrice = 0;
+            
+            if (document.getElementById('badge-double-side').checked) {
+                const optionPrice = getOptionPriceForQuantity('double-side', quantity, priceData.badges.quantities, priceData.badges.options['double-side']);
+                optionsPrice += optionPrice;
+            }
+            
+            if (document.getElementById('badge-personal').checked) {
+                const optionPrice = getOptionPriceForQuantity('personal', quantity, priceData.badges.quantities, priceData.badges.options['personal']);
+                optionsPrice += optionPrice;
+            }
+            
+            if (document.getElementById('badge-second-hole').checked) {
+                optionsPrice += 4; // Фиксированная цена
+            }
+            
+            // Итоговая цена за единицу
+            let pricePerUnit = basePrice + optionsPrice;
+            
+            // Применяем наценку в зависимости от типа клиента
+            pricePerUnit *= clientMultiplier;
+            
+            // Округляем до целого числа в большую сторону
+            pricePerUnit = Math.ceil(pricePerUnit);
+            
+            // Общая стоимость
+            const totalPrice = pricePerUnit * quantity;
+            
+            // Обновляем отображение
+            document.getElementById('badge-price-unit').textContent = pricePerUnit;
+            document.getElementById('badge-price-total').textContent = totalPrice;
+        }
+
+        // Расчет для сублимации
+        function calculateSublimation() {
+            const quantity = parseInt(document.getElementById('sublimation-quantity').value) || 0;
+            const size = document.getElementById('sublimation-type').value;
+            const clientMultiplier = getClientMultiplier('sublimation');
+            const hardwarePrice = getHardwarePrice('sublimation');
+            
+            // Определяем массив цен для выбранного размера
+            let sizePrices;
+            switch(size) {
+                case '170': sizePrices = priceData.sublimation.sizes['15mm']; break;
+                case '180': sizePrices = priceData.sublimation.sizes['20mm']; break;
+                case '190': sizePrices = priceData.sublimation.sizes['25mm']; break;
+                default: sizePrices = priceData.sublimation.sizes['15mm'];
+            }
+            
+            // Получаем базовую цену в зависимости от тиража
+            const basePrice = getPriceForQuantity(quantity, priceData.sublimation.quantities, sizePrices);
+            
+            // Итоговая цена за единицу
+            let pricePerUnit = basePrice + hardwarePrice;
+            
+            // Применяем наценку в зависимости от типа клиента
+            pricePerUnit *= clientMultiplier;
+            
+            // Округляем до целого числа в большую сторону
+            pricePerUnit = Math.ceil(pricePerUnit);
+            
+            // Общая стоимость
+            const totalPrice = pricePerUnit * quantity;
+            
+            // Обновляем отображение
+            document.getElementById('sublimation-price-unit').textContent = pricePerUnit;
+            document.getElementById('sublimation-price-total').textContent = totalPrice;
+        }
+
+        // Расчет для шелкографии
+        function calculateSilkprint() {
+            const quantity = parseInt(document.getElementById('silkprint-quantity').value) || 0;
+            const size = document.getElementById('silkprint-type').value;
+            const clientMultiplier = getClientMultiplier('silkprint');
+            const printType = document.querySelector('input[name="silkprint-print-type"]:checked').value;
+            const hardwarePrice = getHardwarePrice('silkprint');
+            
+            // Определяем массив цен для выбранного размера
+            let sizePrices;
+            switch(size) {
+                case '165': sizePrices = priceData.silkprint.sizes['11mm']; break;
+                case '170': sizePrices = priceData.silkprint.sizes['16mm']; break;
+                case '175': sizePrices = priceData.silkprint.sizes['20mm']; break;
+                case '180': sizePrices = priceData.silkprint.sizes['25mm']; break;
+                default: sizePrices = priceData.silkprint.sizes['11mm'];
+            }
+            
+            // Получаем базовую цену в зависимости от тиража
+            const basePrice = getPriceForQuantity(quantity, priceData.silkprint.quantities, sizePrices);
+            
+            // Расчет стоимости опций печати
+            let printOptionsPrice = 0;
+            let twoColorsPrice = 0;
+            
+            if (printType === 'two-colors') {
+                twoColorsPrice = getTwoColorsPrice(quantity);
+                printOptionsPrice = twoColorsPrice;
+            } else if (printType === 'double-side') {
+                // 1+1: +35% к базовой цене
+                printOptionsPrice = basePrice * 0.35;
+            } else if (printType === 'two-one-side') {
+                // 2+1: +35% к стоимости 2+0
+                twoColorsPrice = getTwoColorsPrice(quantity);
+                const twoColorsTotal = basePrice + twoColorsPrice;
+                printOptionsPrice = twoColorsTotal * 0.35;
+            }
+            
+            // Итоговая цена за единицу
+            let pricePerUnit = basePrice + printOptionsPrice + hardwarePrice;
+            
+            // Применяем наценку в зависимости от типа клиента
+            pricePerUnit *= clientMultiplier;
+            
+            // Округляем до целого числа в большую сторону
+            pricePerUnit = Math.ceil(pricePerUnit);
+            
+            // Общая стоимость
+            const totalPrice = pricePerUnit * quantity;
+            
+            // Обновляем отображение
+            document.getElementById('silkprint-price-unit').textContent = pricePerUnit;
+            document.getElementById('silkprint-price-total').textContent = totalPrice;
+        }
+
+        // Инициализация калькулятора
+        document.addEventListener('DOMContentLoaded', function() {
+            // Инициализация вкладок
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    
+                    // Убираем активный класс у всех кнопок и контента
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Добавляем активный класс к текущей кнопке и контенту
+                    button.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Обработчики для кастомных процентов
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                if (input.id.includes('custom-percent')) {
+                    input.addEventListener('input', function() {
+                        const tabPrefix = this.id.split('-')[0];
+                        document.getElementById(`${tabPrefix}-custom-percent-radio`).checked = true;
+                        if (tabPrefix === 'badge') calculateBadges();
+                        else if (tabPrefix === 'sublimation') calculateSublimation();
+                        else if (tabPrefix === 'silkprint') calculateSilkprint();
+                    });
+                }
+            });
+            
+            // Обработчики для радиокнопок фурнитуры
+            document.querySelectorAll('input[name="sublimation-hardware"]').forEach(radio => {
+                radio.addEventListener('change', calculateSublimation);
+            });
+            
+            document.querySelectorAll('input[name="silkprint-hardware"]').forEach(radio => {
+                radio.addEventListener('change', calculateSilkprint);
+            });
+            
+            // Назначаем обработчики событий для всех полей ввода
+            const badgeInputs = document.querySelectorAll('#badges select, #badges input');
+            badgeInputs.forEach(input => {
+                input.addEventListener('input', calculateBadges);
+                input.addEventListener('change', calculateBadges);
+            });
+            
+            const sublimationInputs = document.querySelectorAll('#sublimation select, #sublimation input');
+            sublimationInputs.forEach(input => {
+                input.addEventListener('input', calculateSublimation);
+                input.addEventListener('change', calculateSublimation);
+            });
+            
+            const silkprintInputs = document.querySelectorAll('#silkprint select, #silkprint input');
+            silkprintInputs.forEach(input => {
+                input.addEventListener('input', calculateSilkprint);
+                input.addEventListener('change', calculateSilkprint);
+            });
+            
+            // Первоначальный расчет
+            calculateBadges();
+            calculateSublimation();
+            calculateSilkprint();
+        });
+    </script>
+</body>
+</html>
